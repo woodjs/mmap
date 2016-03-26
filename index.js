@@ -1,1 +1,1 @@
-export mmap from './lib/mmap';
+export MMap from './src/mmap';
