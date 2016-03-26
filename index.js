@@ -1,1 +1,3 @@
-export MMap from './src/mmap';
+var MMap = require('./lib/mmap');
+
+module.exports = MMap.MMap;

@@ -1,14 +1,17 @@
+"use strict";
+
 let model = [
   {
     name: 'code',
     mapping: 'id',
     convert: function () {
-      reutrn 1;
-    }
+      return 1;
+    },
     value: 4
   },
   {
-    name: 'name'
+    name: 'name',
+    mapping: 'code'
   },
   {
     name: 'taskId',
@@ -19,3 +22,5 @@ let model = [
     mapping: 'jobName'
   }
 ];
+
+module.exports = model;
