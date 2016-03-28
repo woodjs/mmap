@@ -1,3 +1,3 @@
 ##MMap
 
-model层数据映射
+mapping for json
