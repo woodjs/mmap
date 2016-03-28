@@ -1,24 +1,65 @@
 "use strict";
 
+function MMap(configMap) {
 
-function MMap() {
+  var me = this;
+
+  this.configMap = {};
 
   this.mapping = function (model, data) {
 
-    if (!model) return data;
+    if (!model || data && typeof data !== 'object') return data;
 
-    if (data && typeof data === 'object') {
+    var modelMap = reorganizeModel(model);
 
-      let modelMap = reorganizeModel(model);
+    if (!this.configMap.root) return mappingData(modelMap, data);
+
+    var keyList = this.configMap.root.split('.');
+
+    if (keyList[0] !== '*') return mappingData(modelMap, data);
+
+    try {
+
+      return mappingData(modelMap, getObj(data, keyList.slice(1)));
+
+    } catch (e) {
 
       return mappingData(modelMap, data);
-
-    } else {
-
-      return data;
-
     }
   };
+
+  configMap && typeof configMap === 'object' && setConfig(configMap);
+
+
+  function setConfig(configMap) {
+
+    me.configMap = configMap;
+
+  }
+
+
+  function getObj(obj, keyList) {
+
+    if (keyList.length === 0) return obj;
+
+    if (keyList.length > 0) {
+
+      var key = keyList.shift();
+
+      if (key in obj) {
+
+        var curObj = obj[key];
+
+        return getObj(curObj, keyList);
+
+      } else {
+
+        return new Error({
+          message: 'MMap未找到匹配对象！'
+        });
+      }
+    }
+  }
 }
 
 
@@ -32,39 +73,27 @@ function reorganizeModel(model) {
 
   if (!isArray(model)) return {};
 
-  let modelMap = {
+  var modelMap = {
     nameMap: {},
     mappingMap: {},
     convertMap: {},
     valueMap: {}
   };
 
+  for (var i = 0; i < model.length; i++) {
 
-  for (let i = 0; i < model.length; i++) {
-
-    let temp = model[i];
+    var temp = model[i];
 
     if (!('name' in temp)) continue;
 
     modelMap.nameMap[temp['name']] = true;
 
-    if ('mapping' in temp) {
+    if ('mapping' in temp) modelMap.mappingMap[temp['mapping']] = temp['name'];
 
-      modelMap.mappingMap[temp['mapping']] = temp['name'];
+    if ('convert' in temp) modelMap.convertMap[temp['name']] = temp['convert'];
 
-    }
+    if ('value' in temp) modelMap.valueMap[temp['name']] = temp['value'];
 
-    if ('convert' in temp) {
-
-      modelMap.convertMap[temp['name']] = temp['convert'];
-
-    }
-
-    if ('value' in temp) {
-
-      modelMap.valueMap[temp['name']] = temp['value'];
-
-    }
   }
 
   return modelMap;
@@ -80,12 +109,11 @@ function mappingData(modelMap, data) {
 
   if (typeof data !== 'object') return data;
 
-
   if (isArray(data)) {
 
-    let result = [];
+    var result = [];
 
-    for (let i = 0; i < data.length; i++) {
+    for (var i = 0; i < data.length; i++) {
 
       result.push(rebuildObj(modelMap, data[i]));
     }
@@ -108,54 +136,51 @@ function mappingData(modelMap, data) {
  */
 function rebuildObj(modelMap, obj) {
 
-  let result = {};
-  let clonedObj = Object.create(obj);
+  var result = {};
 
-  if (modelMap.mappingMap) {
+  traversalObj(modelMap.mappingMap, function (originKey, targetKey) {
 
-    for (let originPropName in modelMap.mappingMap) {
+    if (originKey in obj) obj[targetKey] = obj[originKey];
 
-      let targetPropName = modelMap.mappingMap[originPropName];
+  });
 
-      if (originPropName in obj) {
+  traversalObj(modelMap.valueMap, function (key) {
 
-        obj[targetPropName] = obj[originPropName];
+    obj[key] = modelMap.valueMap[key];
 
-      }
-    }
-  }
+  });
 
-  if (modelMap.convertMap) {
+  traversalObj(modelMap.convertMap, function (key) {
 
-    for (let targetPropName in modelMap.convertMap) {
+    var fn = modelMap.convertMap[key];
 
-      let fn = modelMap.convertMap[targetPropName];
+    if (typeof fn !== 'function') return;
 
-      if (typeof fn !== 'function') continue;
+    obj[key] = fn(obj[key], obj);
 
-      obj[targetPropName] = fn(obj[targetPropName], obj);
-    }
-  }
+  });
 
-  if (modelMap.valueMap) {
+  traversalObj(modelMap.nameMap, function (key) {
 
-    for (let targetPropName in modelMap.valueMap) {
+    result[key] = obj[key];
 
-      let value = modelMap.valueMap[targetPropName];
-
-      obj[targetPropName] = value;
-    }
-  }
-
-  if (modelMap.nameMap) {
-
-    for (let targetPropName in modelMap.nameMap) {
-
-      result[targetPropName] = obj[targetPropName];
-    }
-  }
+  });
 
   return result;
+}
+
+
+function traversalObj(obj, callback) {
+
+  if (!obj) return;
+
+  for (var key in obj) {
+
+    if (obj.hasOwnProperty(key)) {
+
+      callback(key, obj[key], obj);
+    }
+  }
 }
 
 
@@ -166,4 +191,5 @@ function isArray(obj) {
   return toString.apply(obj) === '[object Array]';
 }
 
-module.exports = new MMap();
+
+module.exports = MMap;

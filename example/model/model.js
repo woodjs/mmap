@@ -1,21 +1,27 @@
 "use strict";
 
-let model = [
+var model = [
   {
     name: 'code',
     mapping: 'id',
-    convert: function () {
-      return 1;
-    },
-    value: 4
+    value: 4,
+    convert: function (val) {
+      return val + 1;
+    }
   },
   {
     name: 'name',
-    mapping: 'code'
+    value: 'yyl',
+    convert: function (val, obj) {
+      return val + ' ' + obj.taskId;
+    }
   },
   {
     name: 'taskId',
-    mapping: 'jobId'
+    mapping: 'jobId',
+    convert: function (val, obj) {
+      return Math.random();
+    }
   },
   {
     name: 'taskName',
