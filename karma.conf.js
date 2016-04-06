@@ -38,7 +38,7 @@ module.exports = function(config) {
 
     coverageReporter: {
         type : 'html',
-        dir : 'report/coverage/'
+        dir : 'report/karma-coverage/'
     },
 
     // web server port

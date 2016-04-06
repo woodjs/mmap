@@ -1,2 +1,2 @@
 --recursive
---reporter spec 
+--reporter mochawesome --reporter-options reportDir=./report/mochawesome-report/,reportName=mmap,reportTitle=mmap,inlineAssets=true
