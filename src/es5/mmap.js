@@ -76,8 +76,8 @@ function reorganizeModel(model) {
   var modelMap = {
     nameMap: {},
     mappingMap: {},
-    convertMap: {},
-    valueMap: {}
+    valueMap: {},
+    convertMap: {}
   };
 
   for (var i = 0; i < model.length; i++) {

@@ -1,4 +1,4 @@
-var MMap = require('../lib/es5/mmap');
+var MMap = require('../lib/es6/mmap');
 var expect = require('chai').expect;
 
 var data = {
@@ -33,8 +33,8 @@ var model = [
 ];
 
 
-describe('测试mmap（es5）', function () {
-    it('mmap（es5）测试用例', function () {
+describe('测试mmap（es6）', function () {
+    it('mmap（es6）测试用例', function () {
 
       var mmap = new MMap({root: '*.abc.ddd'});
       var result = [{

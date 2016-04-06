@@ -4,11 +4,12 @@ var webpack = require('webpack');
 module.exports = {
 
   entry: {
-    mmap: path.join(__dirname, './src/es6/mmap.js')
+    './lib/es5/mmap': path.join(__dirname, './src/es5/mmap.js'),
+    './lib/es6/mmap': path.join(__dirname, './src/es6/mmap.js')
   },
 
   output: {
-    path: path.join(__dirname, './lib/es6'),
+    path: path.join(__dirname, ''),
     filename: '[name].js'
   },
 

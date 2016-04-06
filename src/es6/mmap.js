@@ -2,23 +2,59 @@ import * as utils from './utils';
 
 export class MMap {
 
-  static mapping(model, data) {
+  construct(configMap) {
 
-    if (!model) return data;
+    if (configMap && typeof configMap === 'object') {
 
-    if (data && typeof data === 'object') {
-
-        let modelMap = reorganizeModel(model);
-
-        return mappingData(modelMap, data);
-
-    } else {
-
-      return data;
+       this.configMap = configMap;
 
     }
   }
 
+  mapping(model, data) {
+
+    if (!model || data && typeof data !== 'object') return data;
+
+    let modelMap = reorganizeModel(model);
+
+    if (!this.configMap.root) return mappingData(modelMap, data);
+
+    let keyList = this.configMap.root.split('.');
+
+    if (keyList[0] !== '*') return mappingData(modelMap, data);
+
+    try {
+
+      return mappingData(modelMap, MMap.getObj(data, keyList.slice(1)));
+
+    } catch (e) {
+
+      return mappingData(modelMap, data);
+    }
+  }
+
+  static getObj(obj, keyList) {
+
+    if (keyList.length === 0) return obj;
+
+    if (keyList.length > 0) {
+
+      let key = keyList.shift();
+
+      if (key in obj) {
+
+        let curObj = obj[key];
+
+        return getObj(curObj, keyList);
+
+      } else {
+
+        return new Error({
+          message: 'MMap未找到匹配对象！'
+        });
+      }
+    }
+  }
 }
 
 
@@ -35,10 +71,9 @@ function reorganizeModel(model) {
   let modelMap = {
     nameMap: {},
     mappingMap: {},
-    convertMap: {},
-    valueMap: {}
+    valueMap: {},
+    convertMap: {}
   };
-
 
   for (let i = 0; i < model.length; i++) {
 
@@ -48,23 +83,12 @@ function reorganizeModel(model) {
 
     modelMap.nameMap[temp['name']] = true;
 
-    if ('mapping' in temp) {
+    if ('mapping' in temp) modelMap.mappingMap[temp['mapping']] = temp['name'];
 
-      modelMap.mappingMap[temp['mapping']] = temp['name'];
+    if ('convert' in temp) modelMap.convertMap[temp['name']] = temp['convert'];
 
-    }
+    if ('value' in temp) modelMap.valueMap[temp['name']] = temp['value'];
 
-    if ('convert' in temp) {
-
-      modelMap.convertMap[temp['name']] = temp['convert'];
-
-    }
-
-    if ('value' in temp) {
-
-      modelMap.valueMap[temp['name']] = temp['value'];
-
-    }
   }
 
   return modelMap;
@@ -79,7 +103,6 @@ function reorganizeModel(model) {
 function mappingData(modelMap, data) {
 
   if (typeof data !== 'object') return data;
-
 
   if (utils.isArray(data)) {
 
@@ -108,47 +131,45 @@ function mappingData(modelMap, data) {
  */
 function rebuildObj(modelMap, obj) {
 
-  let clonedObj = Object.create(obj);
   let result = {};
 
   if (modelMap.mappingMap) {
 
-    for (let {originPropName, targetPropName} of modelMap.mappingMap) {
+    for (let {originKey, targetKey} of modelMap.mappingMap) {
 
-      if (originPropName in obj) {
+      if (originKey in obj) obj[targetKey] = obj[originKey];
 
-        obj[targetPropName] = obj[originPropName];
-
-      }
-    }
-  }
-
-  if (modelMap.convertMap) {
-
-    for (let {targetPropName, fn} of modelMap.convertMap) {
-
-      if (typeof fn !== 'function') continue;
-
-      obj[targetPropName] = fn(obj[targetPropName], obj);
     }
   }
 
   if (modelMap.valueMap) {
 
-    for (let {targetPropName, value} of modelMap.valueMap) {
+    for (let {key, value} of modelMap.valueMap) {
 
-      obj[targetPropName] = value;
+      obj[key] = value;
+
+    }
+  }
+
+  if (modelMap.convertMap) {
+
+    for (let {key, fn} of modelMap.convertMap) {
+
+      if (typeof fn !== 'function') continue;
+
+      obj[key] = fn(obj[key], obj);
+
     }
   }
 
   if (modelMap.nameMap) {
 
-    for (let {targetPropName} of modelMap.nameMap.keys()) {
+    for (let {key} of modelMap.nameMap.keys()) {
 
-      result[targetPropName] = obj[targetPropName];
+      result[key] = obj[key];
+
     }
   }
 
   return result;
 }
-
