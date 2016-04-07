@@ -1,4 +1,4 @@
-export class utils {
+export default class utils {
 
   static isArray(obj) {
 

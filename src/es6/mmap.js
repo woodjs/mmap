@@ -1,14 +1,10 @@
-import * as utils from './utils';
+import utils from './utils';
 
 export class MMap {
 
-  construct(configMap) {
+  constructor(configMap) {
 
-    if (configMap && typeof configMap === 'object') {
-
-       this.configMap = configMap;
-
-    }
+    this.configMap =  configMap && typeof configMap === 'object' ? configMap : {};
   }
 
   mapping(model, data) {
@@ -45,7 +41,7 @@ export class MMap {
 
         let curObj = obj[key];
 
-        return getObj(curObj, keyList);
+        return MMap.getObj(curObj, keyList);
 
       } else {
 
@@ -135,7 +131,9 @@ function rebuildObj(modelMap, obj) {
 
   if (modelMap.mappingMap) {
 
-    for (let {originKey, targetKey} of modelMap.mappingMap) {
+    for (let originKey of Object.keys(modelMap.mappingMap)) {
+
+      let targetKey = modelMap.mappingMap[originKey];
 
       if (originKey in obj) obj[targetKey] = obj[originKey];
 
@@ -144,7 +142,9 @@ function rebuildObj(modelMap, obj) {
 
   if (modelMap.valueMap) {
 
-    for (let {key, value} of modelMap.valueMap) {
+    for (let key of Object.keys(modelMap.valueMap)) {
+
+      let value = modelMap.valueMap[key];
 
       obj[key] = value;
 
@@ -153,7 +153,9 @@ function rebuildObj(modelMap, obj) {
 
   if (modelMap.convertMap) {
 
-    for (let {key, fn} of modelMap.convertMap) {
+    for (let key of Object.keys(modelMap.convertMap)) {
+
+      let fn = modelMap.convertMap[key];
 
       if (typeof fn !== 'function') continue;
 
@@ -164,7 +166,7 @@ function rebuildObj(modelMap, obj) {
 
   if (modelMap.nameMap) {
 
-    for (let {key} of modelMap.nameMap.keys()) {
+    for (let key of Object.keys(modelMap.nameMap)) {
 
       result[key] = obj[key];
 
