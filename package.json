@@ -4,7 +4,6 @@
   "description": "mapping for json",
   "main": "index.js",
   "directories": {
-    "example": "example",
     "test": "test"
   },
   "scripts": {
