@@ -1,3 +1,3 @@
-var MMap = require('./lib/es5/mmap');
+var MMap = require('./lib/es6/mmap');
 
 module.exports = MMap;
