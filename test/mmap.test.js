@@ -1,4 +1,4 @@
-var MMap = require('../lib/es6/mmap').MMap;
+var MMap = require('../src/mmap');
 var expect = require('chai').expect;
 
 var data = {

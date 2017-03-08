@@ -1,6 +1,6 @@
-import utils from './utils';
+let utils = require('./utils');
 
-export class MMap {
+class MMap {
 
   constructor(configMap) {
 
@@ -175,3 +175,6 @@ function rebuildObj(modelMap, obj) {
 
   return result;
 }
+
+
+module.exports = MMap;
