@@ -1,5 +1,3 @@
-let utils = require('./utils');
-
 class MMap {
 
   constructor(configMap) {
@@ -62,7 +60,7 @@ class MMap {
  */
 function reorganizeModel(model) {
 
-  if (!utils.isArray(model)) return {};
+  if (!Array.isArray(model)) return {};
 
   let modelMap = {
     nameMap: {},
@@ -100,7 +98,7 @@ function mappingData(modelMap, data) {
 
   if (typeof data !== 'object') return data;
 
-  if (utils.isArray(data)) {
+  if (Array.isArray(data)) {
 
     let result = [];
 
